@@ -46,7 +46,7 @@ const start = () => {
                 getEmployeesByDepartment();
               break;  
             case 'View all employees by Manager':
-              
+              getEmployeesByManager();
               break;
             default:
                 connection.end();
@@ -88,6 +88,25 @@ const start = () => {
       }
     );
   }
+
+  const getEmployeesByManager = () =>{
+    //View all employees
+       
+    connection.query(
+       "SELECT a.first_name, a.last_name, concat(b.first_name, ' ', b.last_Name) as manager  "
+      + "FROM employee a LEFT JOIN employee b on (a.id=b.manager_id);",
+
+      (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        console.log('Employee by manager  created successfully!');
+       
+        start();
+      }
+    );
+  }
+
+
 
 // connect to the mysql server and sql database
 connection.connect((err) => {
