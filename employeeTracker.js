@@ -46,8 +46,12 @@ const start = () => {
                 getEmployeesByDepartment();
               break;  
             case 'View all employees by Manager':
-              getEmployeesByManager();
-              break;
+                getEmployeesByManager();
+                break;
+            case 'Add employee':
+                  addEmployee();
+                  break;  
+              
             default:
                 connection.end();
           }
@@ -106,11 +110,119 @@ const start = () => {
     );
   }
 
+ 
+    
+
+    
+}
+
+  function getManagerNames() {
+    
+     connection.query("SELECT employee.id, concat(employee.first_name, ' ' ,  employee.last_name) AS Employee FROM employee WHERE manager_id IS NULL;",
+     function (err,res) {
+      
+      if (err) throw err;
+      
+      var empArray1=[];
+      for (let i =0; i < res.length; i++){
+        empArray1.push(res[i].Employee)
+      }
+      console.log(empArray1);
+      return empArray1;
+  });
+  
+  
+}
+
+
+
+// get manager id
+async function getManagerId(managerName){
+  let query="SELECT * FROM employee_tracker_db.employee WHERE concat(first_name, ' ', last_Name) =?";
+  let pm=[managerName];
+  const rows=await connection.query(query,pm);
+  return rows[0].id;
+
+}
+
+
+// add employee
+   function addEmployee(){
+    
+    connection.query("SELECT * FROM role ORDER BY title;",
+    function (err, res)  {
+      
+      
+      
+            inquirer
+            .prompt([
+              {
+              name: 'firstName',
+              type: 'input',
+              message: 'What is the employee first name?'
+              },
+              {name: 'lastName',
+              type: 'input',
+              message: 'What is the employee last name?'
+              },
+              {
+                name: 'manager',
+                type: 'input', 
+                message: "What is the employee's manager's ID? ",
+                
+                 
+                    
+                },
+              
+              {name: 'role',
+                type: 'list',
+                message: "What is the employee's role?",
+                choices: function(){
+                  var roleArray=[];
+                  for(let i=0; i < res.length; i++){
+                    roleArray.push(res[i].title);
+                  }
+                  
+                  return roleArray;
+                }
+                
+                },
+            
+              ]).then (function (answer){
+                let roleId;
+                for (let i=0; i < res.length; i++){
+                  if(res[i].title===answer.role){
+                    roleId=res[i].id;
+                    console.log(roleId);
+                  }
+
+                  
+                }
+
+                connection.query('INSERT INTO employee Set ?',
+                  {
+                    first_name:answer.firstName,
+                    last_name:answer.lastName,
+                    manager_id:answer.manager,
+                    role_id:roleId,
+                  }, function(err){
+                    if (err) throw err;
+                    console.log("emp added")
+                    start();
+                  }
+              
+                )
+              })
+        
+    })
+  };
 
 
 // connect to the mysql server and sql database
 connection.connect((err) => {
     if (err) throw err;
     // run the start function after the connection is made to prompt the user
+    
     start();
+    
   });
