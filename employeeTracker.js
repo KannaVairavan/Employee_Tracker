@@ -25,10 +25,12 @@ const start = () => {
         type: 'list',
         message: 'What would you like to do?',
         choices: [
-                    'View all employee',
-                    'View all employees by Department',
-                    'View all employees by Manager',
-                    'Add employee',
+                    "View all employee",
+                    "View all employee's by Department",
+                    "View all employee's by Manager",
+                    "Add role",
+                    "Add Department",
+                    "Add employee",
                     'Remove employee',
                     'Update employee Role',
                     'Update employee Manager',
@@ -48,11 +50,20 @@ const start = () => {
             case 'View all employees by Manager':
                 getEmployeesByManager();
                 break;
+            case 'Add Department':
+                  addDepartment();
+                  break;  
+            case 'Add role':
+                  addrole();
+                  break;  
             case 'Add employee':
                   addEmployee();
                   break;  
             case  'Update employee Role':
                   updateEmpRole();  
+                  break;
+            case 'Update employee Manager':
+                  updateEmpManager();
                   break;
             default:
                 connection.end();
@@ -142,6 +153,106 @@ async function getManagerId(managerName){
   return rows[0].id;
 
 }
+// add role
+
+function addrole(){
+    
+  connection.query("SELECT * FROM department ORDER BY name;",
+  function (err, res)  {
+ 
+    
+          inquirer
+          .prompt([
+                {
+                name: 'role',
+                type: 'input',
+                message: 'Input role title?'
+                },
+
+                {
+                  name: 'Salary',
+                  type: 'input',
+                  message: 'Input salary for the current role?'
+                  },
+
+                {
+                  name: 'department',
+                  type: 'list',
+                  message: "Select Department?",
+                  choices: function(){
+                  var depArray=[];
+                  for(let i=0; i < res.length; i++){
+                    depArray.push(res[i].name);
+                  }
+                  
+                  return depArray;
+                }
+                
+                },
+        
+          
+            ]).then (function (answer){
+              
+              let depId;
+              for (let i=0; i < res.length; i++){
+                if(res[i].name===answer.department){
+                  depId=res[i].id;
+                  console.log(depId);
+                }
+
+                
+              }
+
+              connection.query('INSERT INTO role Set ?',
+                {
+                  title:answer.role,
+                  salary:answer.Salary,
+                  department_id:depId,
+                  
+                }, function(err){
+                  if (err) throw err;
+                  console.log("Role Added")
+                  start();
+                }
+            
+              )
+            })
+      
+   })
+};
+// Add Department
+
+function addDepartment(){
+  
+          inquirer
+          .prompt([
+            {
+            name: 'name',
+            type: 'input',
+            message: 'Input department name?'
+            },
+           
+
+            
+          
+            ]).then (function (answer){
+              
+
+              connection.query('INSERT INTO department Set ?',
+                {
+                  name:answer.name,
+                  
+                }, function(err){
+                  if (err) throw err;
+                  console.log("Department added")
+                  start();
+                }
+            
+              )
+            })
+      
+  // })
+};
 
 
 // add employee
@@ -290,6 +401,85 @@ async function getManagerId(managerName){
               })
       })
   }
+
+
+
+  const updateEmpManager = () =>{
+
+    connection.query("SELECT employee.id, concat(employee.first_name, ' ' ,  employee.last_name) AS Employee FROM employee ;",  
+        function (err, empRes)  {
+          inquirer
+            .prompt([
+              {
+                name: 'name',
+                type: 'list',
+                message: 'Select employee?',
+                choices: function(){
+                      var empArray=[];
+                      console.log(empRes.length)
+                      for(let i=0; i < empRes.length; i++){
+                        empArray.push(empRes[i].Employee);
+                      }
+                      
+                      return empArray;
+                    }
+                
+                },
+            
+              ]).then(function(answer){
+                            let empId;
+                            for (let i=0; i < empRes.length; i++){
+                                  if(empRes[i].Employee===answer.name){
+                                    empId=empRes[i].id;
+                                    console.log(empId);
+                                  }
+
+                            }
+                        connection.query("SELECT employee.id, concat(employee.first_name, ' ' ,  employee.last_name) AS Employee FROM employee WHERE manager_id IS NULL;",
+                        function (err, res)  {
+                            inquirer
+                            .prompt([
+                                  {name: 'manager',
+                                    type: 'list',
+                                    message: "Select employee's manager?",
+                                    choices: function(){
+                                      var eArray=[];
+                                      for(let i=0; i < res.length; i++){
+                                        eArray.push(res[i].Employee);
+                                      }
+                                      
+                                      return eArray;
+                                    }
+                                    
+                                    },
+                                  ]).then (function (answer){
+                                    let managerId;
+                                    for (let i=0; i < res.length; i++){
+                                      if(res[i].Employee===answer.manager){
+                                        managerId=res[i].id;
+                                        console.log(managerId);
+                                      }
+
+                                      
+                                    }
+
+                                  connection.query('UPDATE employee SET manager_id=? WHERE id=?;',
+                                    [managerId, empId]
+                                    , function(err){
+                                      if (err) throw err;
+                                      console.log("Employee role updated")
+                                      start();
+                                    }
+                            
+                                  )
+                            })
+
+                        })
+                
+            })
+    })
+}
+
 // connect to the mysql server and sql database
 
 
