@@ -51,7 +51,9 @@ const start = () => {
             case 'Add employee':
                   addEmployee();
                   break;  
-              
+            case  'Update employee Role':
+                  updateEmpRole();  
+                  break;
             default:
                 connection.end();
           }
@@ -111,10 +113,6 @@ const start = () => {
   }
 
  
-    
-
-    
-}
 
   function getManagerNames() {
     
@@ -138,7 +136,7 @@ const start = () => {
 
 // get manager id
 async function getManagerId(managerName){
-  let query="SELECT * FROM employee_tracker_db.employee WHERE concat(first_name, ' ', last_Name) =?";
+  let query="SELECT * FROM employee WHERE concat(first_name, ' ', last_Name) =?";
   let pm=[managerName];
   const rows=await connection.query(query,pm);
   return rows[0].id;
@@ -216,10 +214,89 @@ async function getManagerId(managerName){
         
     })
   };
+  
+  const updateEmpRole = () =>{
 
+      connection.query("SELECT employee.id, concat(employee.first_name, ' ' ,  employee.last_name) AS Employee FROM employee ;",  
+          function (err, empRes)  {
+            inquirer
+              .prompt([
+                {
+                  name: 'name',
+                  type: 'list',
+                  message: 'Select employee?',
+                  choices: function(){
+                        var empArray=[];
+                        console.log(empRes.length)
+                        for(let i=0; i < empRes.length; i++){
+                          empArray.push(empRes[i].Employee);
+                        }
+                        
+                        return empArray;
+                      }
+                  
+                  },
+              
+                ]).then(function(answer){
+                              let empId;
+                              for (let i=0; i < empRes.length; i++){
+                                    if(empRes[i].Employee===answer.name){
+                                      empId=empRes[i].id;
+                                      console.log(empId);
+                                    }
 
+                              }
+                          connection.query("SELECT * FROM role ORDER BY title;",
+                          function (err, res)  {
+                              inquirer
+                              .prompt([
+                                    {name: 'role',
+                                      type: 'list',
+                                      message: "What is the employee's role?",
+                                      choices: function(){
+                                        var roleArray=[];
+                                        for(let i=0; i < res.length; i++){
+                                          roleArray.push(res[i].title);
+                                        }
+                                        
+                                        return roleArray;
+                                      }
+                                      
+                                      },
+                                    ]).then (function (answer){
+                                      let roleId;
+                                      for (let i=0; i < res.length; i++){
+                                        if(res[i].title===answer.role){
+                                          roleId=res[i].id;
+                                          console.log(roleId);
+                                        }
+
+                                        
+                                      }
+
+                                    connection.query('UPDATE employee SET role_id=? WHERE id=?;',
+                                      [roleId, empId]
+                                      , function(err){
+                                        if (err) throw err;
+                                        console.log("Employee role updated")
+                                        start();
+                                      }
+                              
+                                    )
+                              })
+
+                          })
+                  
+              })
+      })
+  }
 // connect to the mysql server and sql database
+
+
+
 connection.connect((err) => {
+
+
     if (err) throw err;
     // run the start function after the connection is made to prompt the user
     
