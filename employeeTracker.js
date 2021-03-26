@@ -26,6 +26,8 @@ const start = () => {
         message: 'What would you like to do?',
         choices: [
                     "View all employee",
+                    "View all department",
+                    "View all roles",
                     "View all employee's by Department",
                     "View all employee's by Manager",
                     "Add role",
@@ -42,13 +44,22 @@ const start = () => {
         console.log(answer);
          switch (answer.choice) {
             case 'View all employee':
-                getAllEmployee();
+                // getAllEmployee();
+                viewQuery('View all employee');
               break;
-            case 'View all employees by Department':
-                getEmployeesByDepartment();
+            case 'View all department':
+                viewQuery('View all department');
+                 break;
+            case 'View all roles':
+                viewQuery('View all roles');
+                break;
+            case "View all employee's by Department":
+                viewQuery('View all employees by Department');
+                // getEmployeesByDepartment();
               break;  
-            case 'View all employees by Manager':
-                getEmployeesByManager();
+            case "View all employee's by Manager":
+                viewQuery('View all employees by Manager');   
+              //  getEmployeesByManager();
                 break;
             case 'Add Department':
                   addDepartment();
@@ -72,6 +83,48 @@ const start = () => {
       });
   };
 
+  const viewQuery = (dataPrompt) =>{
+
+    let sqlquery;
+    console.log (dataPrompt);
+    switch (dataPrompt) {
+      case 'View all employee':
+         sqlquery="SELECT * FROM employee;"
+         break;
+      case 'View all department':
+         sqlquery="SELECT * FROM department;"
+           break;
+      case 'View all roles':
+        sqlquery="SELECT * FROM role;"   
+          break;
+      case 'View all employees by Department':
+
+          sqlquery="SELECT first_name, last_name, name AS department FROM employee "
+                     + "INNER JOIN role ON (employee.role_id=role.id) "
+                     + " INNER JOIN department ON (role.department_id=department.id);"
+          console.log (sqlquery);
+        break;  
+      case 'View all employees by Manager':
+
+          sqlquery="SELECT b.first_name, b.last_name, concat(a.first_name, ' ', a.last_Name) as manager  "
+                    + "FROM employee a INNER JOIN employee b on (a.id=b.manager_id);"
+          break;
+     
+    }
+    
+    //View all employees
+    connection.query(
+      sqlquery,
+      
+      (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        console.log('List was  created successfully!');
+       
+        start();
+      }
+    );
+  }
   const getAllEmployee = () =>{
     //View all employees
     connection.query(
