@@ -25,6 +25,7 @@ const start = () => {
         type: 'list',
         message: 'What would you like to do?',
         choices: [
+                    
                     "View all employee",
                     "View all department",
                     "View all roles",
@@ -33,9 +34,11 @@ const start = () => {
                     "Add role",
                     "Add Department",
                     "Add employee",
-                    'Remove employee',
-                    'Update employee Role',
-                    'Update employee Manager',
+                    "Update employee Role",
+                    "Update employee Manager",
+                    "Remove employee",
+                    "Remove role",
+                    "Remove department",
                      'EXIT'
                     ],
       })
@@ -76,55 +79,148 @@ const start = () => {
             case 'Update employee Manager':
                   updateEmpManager();
                   break;
+            case 'Remove employee':
+              
+                  deleteQuery('employee');
+                  break;
+            
+            case 'Remove role':
+              
+                  deleteQuery('role');
+                  break;
+            case 'Remove department':
+    
+                  deleteQuery('Department');
+                  
+                  break;
             default:
                 connection.end();
           }
                   
       });
   };
+// ************************************************
+// View data
+const viewQuery = (dataPrompt) =>{
 
-  const viewQuery = (dataPrompt) =>{
+  let sqlquery;
+  console.log (dataPrompt);
+      switch (dataPrompt) 
+      {
+        case 'View all employee':
+            sqlquery="SELECT * FROM employee;"
+            break;
+        case 'View all department':
+            sqlquery="SELECT * FROM department;"
+            break;
+        case 'View all roles':
+            sqlquery="SELECT * FROM role;"   
+            break;
+        case 'View all employees by Department':
 
-    let sqlquery;
-    console.log (dataPrompt);
-    switch (dataPrompt) {
-      case 'View all employee':
-         sqlquery="SELECT * FROM employee;"
-         break;
-      case 'View all department':
-         sqlquery="SELECT * FROM department;"
-           break;
-      case 'View all roles':
-        sqlquery="SELECT * FROM role;"   
-          break;
-      case 'View all employees by Department':
+            sqlquery="SELECT first_name, last_name, name AS department FROM employee "
+                      + "INNER JOIN role ON (employee.role_id=role.id) "
+                      + " INNER JOIN department ON (role.department_id=department.id);"
+            console.log (sqlquery);
+            break;  
+        case 'View all employees by Manager':
 
-          sqlquery="SELECT first_name, last_name, name AS department FROM employee "
-                     + "INNER JOIN role ON (employee.role_id=role.id) "
-                     + " INNER JOIN department ON (role.department_id=department.id);"
-          console.log (sqlquery);
-        break;  
-      case 'View all employees by Manager':
-
-          sqlquery="SELECT b.first_name, b.last_name, concat(a.first_name, ' ', a.last_Name) as manager  "
-                    + "FROM employee a INNER JOIN employee b on (a.id=b.manager_id);"
-          break;
-     
-    }
-    
-    //View all employees
-    connection.query(
-      sqlquery,
+            sqlquery="SELECT b.first_name, b.last_name, concat(a.first_name, ' ', a.last_Name) as manager  "
+                      + "FROM employee a INNER JOIN employee b on (a.id=b.manager_id);"
+            break;
       
-      (err, res) => {
-        if (err) throw err;
-        console.table(res);
-        console.log('List was  created successfully!');
-       
-        start();
       }
-    );
-  }
+  
+  //View all employees
+  connection.query(
+    sqlquery,
+    
+    (err, res) => {
+      if (err) throw err;
+      console.table(res);
+      console.log('List was  created successfully!');
+     
+      start();
+    }
+  );
+}
+
+// ***********************************************************************************************
+
+    //  delete query
+const deleteQuery = (dataPrompt) =>{
+
+      let sqlquery;
+      console.log (dataPrompt);
+      switch (dataPrompt) 
+      {
+        case 'employee':
+          sqlSelectQuery="SELECT employee.id, concat(employee.first_name, ' ' ,  employee.last_name) AS listName FROM employee ;"
+          sqlDeleteQuery="DELETE FROM employee WHERE id=?;"
+           break;
+        
+        case 'role':
+          sqlSelectQuery="SELECT id, title as listName FROM role;"   
+          sqlDeleteQuery="DELETE FROM role WHERE id=?";
+          
+            break;
+        case 'Department':
+  
+          sqlSelectQuery="SELECT id, name as listName FROM department;"   
+          sqlDeleteQuery="DELETE FROM department WHERE id=?"
+            
+          break;  
+        
+      }
+
+        //View  employees
+        connection.query(sqlSelectQuery,  
+        function (err, Res)  {
+          inquirer
+            .prompt([
+              {
+                name: 'name',
+                type: 'list',
+                message: 'Select from list',
+                choices: function(){
+                      var lstArray=[];
+                      console.log(Res.length)
+                      for(let i=0; i < Res.length; i++){
+                        lstArray.push(Res[i].listName);
+                      }
+                      
+                      return lstArray;
+                    }
+                
+                },
+            
+                   ]).then(function(answer){
+                            let lstId;
+                            for (let i=0; i < Res.length; i++){
+                                  if(Res[i].listName===answer.name){
+                                    lstId=Res[i].id;
+                                    console.log(lstId);
+                                  }
+
+                            }
+                            console.log (sqlDeleteQuery);
+                            connection.query(sqlDeleteQuery,
+                            [lstId]
+                            , function(err){
+                              if (err) throw err;
+                              console.log("Record deleted")
+                              start();
+                            }
+                    
+                          )
+                  })
+      })
+}
+
+
+
+
+
   const getAllEmployee = () =>{
     //View all employees
     connection.query(
