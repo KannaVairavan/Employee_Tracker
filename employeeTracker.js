@@ -31,6 +31,7 @@ const start = () => {
                     "View all roles",
                     "View all employee's by Department",
                     "View all employee's by Manager",
+                    "Total budget of a department",
                     "Add role",
                     "Add Department",
                     "Add employee",
@@ -47,7 +48,7 @@ const start = () => {
         console.log(answer);
          switch (answer.choice) {
             case 'View all employee':
-                // getAllEmployee();
+                
                 viewQuery('View all employee');
               break;
             case 'View all department':
@@ -58,11 +59,14 @@ const start = () => {
                 break;
             case "View all employee's by Department":
                 viewQuery('View all employees by Department');
-                // getEmployeesByDepartment();
+                
               break;  
             case "View all employee's by Manager":
                 viewQuery('View all employees by Manager');   
-              //  getEmployeesByManager();
+              
+                break;
+            case "Total budget of a department":
+                viewQuery('Total budget of a department');   
                 break;
             case 'Add Department':
                   addDepartment();
@@ -128,7 +132,11 @@ const viewQuery = (dataPrompt) =>{
             sqlquery="SELECT b.first_name, b.last_name, concat(a.first_name, ' ', a.last_Name) as manager  "
                       + "FROM employee a INNER JOIN employee b on (a.id=b.manager_id);"
             break;
-      
+        case 'Total budget of a department':
+            sqlquery="SELECT department.name AS Department, sum(salary) AS Budget "
+                      + "FROM employee INNER JOIN role ON (employee.role_id = role.id) "
+                      + "INNER JOIN department ON (role.department_id = department.id) GROUP BY department.name;"
+            break;
       }
   
   //View all employees
