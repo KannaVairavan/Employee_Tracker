@@ -31,11 +31,17 @@ This command line app have the following functionality.
 
 Node.js, package.json, MySQL, InquirerJs and console.table NPM packages.
 
+## Usage
+
+This application allows a company to manage employee information.
+
 ## Project Demo
 
 Below is the walkthrough video that demonstrates the functionality of the Note Taker app.<br/>
 
 <img src="./assets/employeeTracker.gif" alt="Readme video"  >
+
+[![video link from google drive]](https://drive.google.com/file/d/1AKsraQtF_XhyDFpcQEMcVxKLRoE5wQHv/view)
 
 ## Repository
 

@@ -211,7 +211,7 @@ const deleteQuery = (dataPrompt) =>{
                                   }
 
                             }
-                            console.log (sqlDeleteQuery);
+                            // console.log (sqlDeleteQuery);
                             connection.query(sqlDeleteQuery,
                             [lstId]
                             , function(err){
@@ -592,7 +592,7 @@ function addDepartment(){
                                   }
 
                             }
-                        connection.query("SELECT employee.id, concat(employee.first_name, ' ' ,  employee.last_name) AS Employee FROM employee WHERE manager_id IS NULL;",
+                        connection.query("SELECT employee.id, concat(employee.first_name, ' ' ,  employee.last_name) AS Employee FROM employee;",
                         function (err, res)  {
                             inquirer
                             .prompt([
