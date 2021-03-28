@@ -37,7 +37,7 @@ This application allows a company to manage employee information.
 
 ## Project Demo
 
-Below is the walkthrough video that demonstrates the functionality of the Note Taker app.<br/>
+Below is the walkthrough video that demonstrates the functionality of the employee tracker app.<br/>
 
 <img src="./assets/employeeTracker.gif" alt="Readme video"  >
 
