@@ -30,6 +30,7 @@ This command line app have the following functionality.
 ## Installation:
 
 Node.js, package.json, MySQL, InquirerJs and console.table NPM packages.
+node index.js will start the application with inquirer prompt.
 
 ## Usage
 
